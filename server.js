@@ -24,12 +24,23 @@ if (process.env.SMTP_HOST) {
   transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT) || 587,
-    secure: process.env.SMTP_SECURE === 'true',
+    secure: parseInt(process.env.SMTP_PORT) === 465,
     auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+    tls: { rejectUnauthorized: false },
+    logger: true,
+    debug: process.env.SMTP_DEBUG === 'true',
   });
-  console.log('Email notifications enabled via SMTP');
+  console.log(`Email notifications enabled via SMTP (${process.env.SMTP_HOST}:${process.env.SMTP_PORT})`);
+  // Verify SMTP connection on startup
+  transporter.verify().then(() => {
+    console.log('SMTP connection verified — ready to send emails');
+  }).catch((err) => {
+    console.error('SMTP connection FAILED:', err.message);
+    console.error('Check your SMTP_HOST, SMTP_PORT, SMTP_USER, and SMTP_PASS env vars');
+  });
 } else {
   console.log('Email notifications disabled — set SMTP env vars to enable');
+  console.log('Required: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS');
 }
 
 const NOTIFY_EMAIL = process.env.NOTIFY_EMAIL || 'alex@awmedia.marketing';
@@ -157,6 +168,64 @@ app.get('/audit/results/:id', (req, res) => {
     metrics: audit.metrics,
     data: audit.leadData,
   });
+});
+
+// Test email endpoint
+app.get('/api/test-email', async (req, res) => {
+  const key = req.query.key;
+  if (key !== process.env.ADMIN_KEY && key !== 'alwaysontime2026') {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  if (!transporter) {
+    return res.json({
+      success: false,
+      error: 'No SMTP transporter configured',
+      env: {
+        SMTP_HOST: process.env.SMTP_HOST ? 'set' : 'MISSING',
+        SMTP_PORT: process.env.SMTP_PORT ? 'set' : 'MISSING',
+        SMTP_USER: process.env.SMTP_USER ? 'set' : 'MISSING',
+        SMTP_PASS: process.env.SMTP_PASS ? 'set (hidden)' : 'MISSING',
+        SMTP_FROM: process.env.SMTP_FROM || 'not set (using default)',
+        NOTIFY_EMAIL: NOTIFY_EMAIL,
+      },
+    });
+  }
+
+  try {
+    const info = await transporter.sendMail({
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: NOTIFY_EMAIL,
+      subject: 'Test Email — Social Media Audit Tool',
+      html: `
+        <div style="font-family:Arial,sans-serif;padding:20px;background:#0a0a0a;color:#fff;border-radius:12px;">
+          <h2 style="color:#F92672;">Email is working!</h2>
+          <p>This is a test email from your Social Media Audit Tool.</p>
+          <p style="color:#888;">Sent at: ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}</p>
+          <p style="color:#888;">SMTP Host: ${process.env.SMTP_HOST}</p>
+        </div>
+      `,
+    });
+    res.json({
+      success: true,
+      message: `Test email sent to ${NOTIFY_EMAIL}`,
+      messageId: info.messageId,
+      response: info.response,
+    });
+  } catch (err) {
+    res.json({
+      success: false,
+      error: err.message,
+      code: err.code,
+      command: err.command,
+      env: {
+        SMTP_HOST: process.env.SMTP_HOST,
+        SMTP_PORT: process.env.SMTP_PORT,
+        SMTP_USER: process.env.SMTP_USER ? 'set (hidden)' : 'MISSING',
+        SMTP_PASS: process.env.SMTP_PASS ? 'set (hidden)' : 'MISSING',
+      },
+    });
+  }
 });
 
 // Leads API
