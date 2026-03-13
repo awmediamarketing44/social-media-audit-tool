@@ -1,7 +1,36 @@
 const express = require('express');
 const path = require('path');
+const nodemailer = require('nodemailer');
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Email transporter — configure via environment variables
+let transporter = null;
+if (process.env.SMTP_HOST) {
+  transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: parseInt(process.env.SMTP_PORT) || 587,
+    secure: process.env.SMTP_SECURE === 'true',
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
+  console.log('Email notifications enabled via SMTP');
+} else if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
+  transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_APP_PASSWORD,
+    },
+  });
+  console.log('Email notifications enabled via Gmail');
+} else {
+  console.log('Email notifications disabled — set SMTP or Gmail env vars to enable');
+}
+
+const NOTIFY_EMAIL = process.env.NOTIFY_EMAIL || 'alex@awmedia.marketing';
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -31,6 +60,10 @@ app.post('/audit', (req, res) => {
 
   // Run scoring algorithm
   const results = scoreAudit(data);
+
+  // Send email notification (non-blocking)
+  sendLeadNotification(data, results);
+
   res.render('results', { results, data });
 });
 
@@ -42,6 +75,95 @@ app.get('/api/leads', (req, res) => {
   }
   res.json(leads);
 });
+
+async function sendLeadNotification(data, results) {
+  if (!transporter) return;
+
+  const goalLabels = {
+    brand_awareness: 'Brand Awareness',
+    lead_generation: 'Lead Generation',
+    direct_sales: 'Direct Sales',
+    community: 'Community Building',
+    thought_leadership: 'Thought Leadership',
+  };
+
+  const platforms = Array.isArray(data.platforms) ? data.platforms : [data.platforms];
+  const platformList = platforms.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(', ');
+
+  const platformScores = Object.entries(results.platforms).map(([name, s]) => {
+    const pName = name.charAt(0).toUpperCase() + name.slice(1);
+    return `
+      <tr>
+        <td style="padding:8px 12px;font-weight:bold;color:#fff;">${pName}</td>
+        <td style="padding:8px 12px;color:${ratingColor(s.profileOptimization.rating)}">${s.profileOptimization.rating}</td>
+        <td style="padding:8px 12px;color:${ratingColor(s.contentQuality.rating)}">${s.contentQuality.rating}</td>
+        <td style="padding:8px 12px;color:${ratingColor(s.postingConsistency.rating)}">${s.postingConsistency.rating}</td>
+        <td style="padding:8px 12px;color:${ratingColor(s.engagementHealth.rating)}">${s.engagementHealth.rating}</td>
+        <td style="padding:8px 12px;color:${ratingColor(s.growthSignals.rating)}">${s.growthSignals.rating}</td>
+      </tr>`;
+  }).join('');
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#fff;padding:32px;border-radius:12px;">
+      <h1 style="color:#F92672;margin:0 0 4px;">New Audit Lead</h1>
+      <p style="color:#888;margin:0 0 24px;font-size:14px;">${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}</p>
+
+      <table style="width:100%;margin-bottom:24px;">
+        <tr><td style="color:#888;padding:4px 0;">Name</td><td style="padding:4px 0;"><strong>${data.name}</strong></td></tr>
+        <tr><td style="color:#888;padding:4px 0;">Email</td><td style="padding:4px 0;"><a href="mailto:${data.email}" style="color:#F92672;">${data.email}</a></td></tr>
+        <tr><td style="color:#888;padding:4px 0;">Business</td><td style="padding:4px 0;">${data.business}</td></tr>
+        <tr><td style="color:#888;padding:4px 0;">Goal</td><td style="padding:4px 0;">${goalLabels[data.goal] || data.goal}</td></tr>
+        <tr><td style="color:#888;padding:4px 0;">Platforms</td><td style="padding:4px 0;">${platformList}</td></tr>
+      </table>
+
+      <div style="background:#111;border-radius:8px;padding:20px;margin-bottom:24px;text-align:center;">
+        <p style="color:#888;margin:0 0 4px;font-size:13px;">OVERALL SCORE</p>
+        <p style="font-size:48px;font-weight:bold;margin:0;color:#F92672;">${results.overallScore}/100</p>
+        <p style="font-size:24px;margin:4px 0 0;color:#fff;">Grade: ${results.grade}</p>
+      </div>
+
+      <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:24px;">
+        <thead>
+          <tr style="background:#1a1a1a;">
+            <th style="padding:8px 12px;text-align:left;color:#888;">Platform</th>
+            <th style="padding:8px 12px;text-align:left;color:#888;">Profile</th>
+            <th style="padding:8px 12px;text-align:left;color:#888;">Content</th>
+            <th style="padding:8px 12px;text-align:left;color:#888;">Consistency</th>
+            <th style="padding:8px 12px;text-align:left;color:#888;">Engagement</th>
+            <th style="padding:8px 12px;text-align:left;color:#888;">Growth</th>
+          </tr>
+        </thead>
+        <tbody>${platformScores}</tbody>
+      </table>
+
+      <div style="background:#1a1a1a;border-left:3px solid #F92672;padding:16px;border-radius:0 8px 8px 0;">
+        <p style="margin:0;font-size:13px;color:#ccc;">This lead scored <strong>${results.overallScore}/100</strong> — ${results.overallScore < 50 ? 'a strong candidate for AW-LWAYS On Time.' : results.overallScore < 70 ? 'could benefit from consistent graphics support.' : 'doing well but may want to level up visuals.'}</p>
+      </div>
+
+      <p style="margin:24px 0 0;text-align:center;">
+        <a href="mailto:${data.email}?subject=Your%20Social%20Media%20Audit%20Results&body=Hi%20${encodeURIComponent(data.name.split(' ')[0])}%2C%0A%0AThanks%20for%20completing%20the%20social%20media%20audit!" style="display:inline-block;background:#F92672;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:bold;">Reply to ${data.name.split(' ')[0]}</a>
+      </p>
+    </div>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM || process.env.GMAIL_USER || 'noreply@awmedia.marketing',
+      to: NOTIFY_EMAIL,
+      subject: `New Audit Lead: ${data.name} (${results.overallScore}/100)`,
+      html,
+    });
+    console.log(`Email notification sent for ${data.name}`);
+  } catch (err) {
+    console.error('Failed to send email notification:', err.message);
+  }
+}
+
+function ratingColor(rating) {
+  if (rating === 'Strong') return '#22c55e';
+  if (rating === 'Needs Work') return '#eab308';
+  return '#ef4444';
+}
 
 function scoreAudit(data) {
   // Normalize platforms to always be an array (single checkbox = string)
