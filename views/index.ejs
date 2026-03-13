@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Free Social Media Audit | Always On Time</title>
+  <title>Free Social Media Audit | AW Media</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rethink+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -11,29 +11,24 @@
 </head>
 <body>
   <div class="container">
-    <!-- Hero Section -->
     <header class="hero">
       <div class="badge">FREE AUDIT</div>
-      <h1>Your Social Media<br><span class="accent">Isn't Working.</span><br>Let's Find Out Why.</h1>
-      <p class="subtitle">Answer 7 quick questions. Get an instant scorecard showing exactly where you're losing followers, engagement, and revenue.</p>
-      <p class="time-estimate">Takes less than 3 minutes</p>
+      <h1>We'll Scan Your <span class="accent">Real Profiles.</span><br>You'll See What's Broken.</h1>
+      <p class="subtitle">Enter your social media handles. We'll scrape your actual profiles and score you across 5 dimensions with real data — not guesswork.</p>
+      <p class="time-estimate">Takes about 60 seconds</p>
     </header>
 
-    <!-- Multi-step Form -->
-    <form id="auditForm" action="/audit" method="POST">
-      <!-- Progress Bar -->
+    <form id="auditForm">
+      <!-- Progress -->
       <div class="progress-container">
         <div class="progress-bar" id="progressBar"></div>
         <div class="progress-steps">
           <span class="step-dot active" data-step="1">1</span>
           <span class="step-dot" data-step="2">2</span>
-          <span class="step-dot" data-step="3">3</span>
-          <span class="step-dot" data-step="4">4</span>
-          <span class="step-dot" data-step="5">5</span>
         </div>
       </div>
 
-      <!-- Step 1: Lead Capture + Business Info -->
+      <!-- Step 1: Lead Capture -->
       <div class="form-step active" id="step1">
         <h2>Let's start with <span class="accent">you</span></h2>
         <div class="form-group">
@@ -60,99 +55,77 @@
             <option value="thought_leadership">Thought Leadership — Become the go-to expert</option>
           </select>
         </div>
-        <button type="button" class="btn btn-next" onclick="nextStep(1)">Next Step →</button>
+        <button type="button" class="btn btn-next" onclick="nextStep(1)">Next Step</button>
       </div>
 
-      <!-- Step 2: Platform Selection -->
+      <!-- Step 2: Platform Handles -->
       <div class="form-step" id="step2">
-        <h2>Which platforms are you <span class="accent">active</span> on?</h2>
-        <p class="step-description">Select all platforms where you have an account and have posted at least once.</p>
-        <div class="platform-grid">
-          <label class="platform-card">
-            <input type="checkbox" name="platforms" value="instagram">
-            <div class="platform-inner">
-              <div class="platform-icon">📸</div>
+        <h2>Enter your <span class="accent">social handles</span></h2>
+        <p class="step-description">Add at least one. We'll scan each profile and analyse your real data.</p>
+
+        <div class="handle-list">
+          <div class="handle-group">
+            <div class="handle-label">
+              <span class="handle-icon">📸</span>
               <span>Instagram</span>
             </div>
-          </label>
-          <label class="platform-card">
-            <input type="checkbox" name="platforms" value="tiktok">
-            <div class="platform-inner">
-              <div class="platform-icon">🎵</div>
+            <input type="text" name="handle_instagram" placeholder="@yourusername">
+          </div>
+
+          <div class="handle-group">
+            <div class="handle-label">
+              <span class="handle-icon">🎵</span>
               <span>TikTok</span>
             </div>
-          </label>
-          <label class="platform-card">
-            <input type="checkbox" name="platforms" value="linkedin">
-            <div class="platform-inner">
-              <div class="platform-icon">💼</div>
-              <span>LinkedIn</span>
-            </div>
-          </label>
-          <label class="platform-card">
-            <input type="checkbox" name="platforms" value="facebook">
-            <div class="platform-inner">
-              <div class="platform-icon">👥</div>
+            <input type="text" name="handle_tiktok" placeholder="@yourusername">
+          </div>
+
+          <div class="handle-group">
+            <div class="handle-label">
+              <span class="handle-icon">👥</span>
               <span>Facebook</span>
             </div>
-          </label>
-          <label class="platform-card">
-            <input type="checkbox" name="platforms" value="twitter">
-            <div class="platform-inner">
-              <div class="platform-icon">𝕏</div>
-              <span>X / Twitter</span>
+            <input type="text" name="handle_facebook" placeholder="facebook.com/yourpage">
+          </div>
+
+          <div class="handle-group">
+            <div class="handle-label">
+              <span class="handle-icon">💼</span>
+              <span>LinkedIn</span>
             </div>
-          </label>
-          <label class="platform-card">
-            <input type="checkbox" name="platforms" value="youtube">
-            <div class="platform-inner">
-              <div class="platform-icon">▶️</div>
+            <input type="text" name="handle_linkedin" placeholder="linkedin.com/in/yourname">
+          </div>
+
+          <div class="handle-group">
+            <div class="handle-label">
+              <span class="handle-icon">▶️</span>
               <span>YouTube</span>
             </div>
-          </label>
-          <label class="platform-card">
-            <input type="checkbox" name="platforms" value="pinterest">
-            <div class="platform-inner">
-              <div class="platform-icon">📌</div>
+            <input type="text" name="handle_youtube" placeholder="@channelname or channel URL">
+          </div>
+
+          <div class="handle-group">
+            <div class="handle-label">
+              <span class="handle-icon">𝕏</span>
+              <span>X / Twitter</span>
+            </div>
+            <input type="text" name="handle_twitter" placeholder="@yourusername">
+          </div>
+
+          <div class="handle-group">
+            <div class="handle-label">
+              <span class="handle-icon">📌</span>
               <span>Pinterest</span>
             </div>
-          </label>
+            <input type="text" name="handle_pinterest" placeholder="@yourusername or profile URL">
+          </div>
         </div>
-        <div class="btn-row">
-          <button type="button" class="btn btn-back" onclick="prevStep(2)">← Back</button>
-          <button type="button" class="btn btn-next" onclick="nextStep(2)">Next Step →</button>
-        </div>
-      </div>
 
-      <!-- Step 3: Profile & Content (per platform) -->
-      <div class="form-step" id="step3">
-        <h2>Tell us about your <span class="accent">profile & content</span></h2>
-        <p class="step-description">Answer for each of your active platforms.</p>
-        <div id="platformQuestions3"></div>
-        <div class="btn-row">
-          <button type="button" class="btn btn-back" onclick="prevStep(3)">← Back</button>
-          <button type="button" class="btn btn-next" onclick="nextStep(3)">Next Step →</button>
-        </div>
-      </div>
+        <div id="formError" class="form-error" style="display:none;"></div>
 
-      <!-- Step 4: Consistency & Engagement (per platform) -->
-      <div class="form-step" id="step4">
-        <h2>How's your <span class="accent">consistency & engagement</span>?</h2>
-        <p class="step-description">Be honest — this is how we find the real opportunities.</p>
-        <div id="platformQuestions4"></div>
         <div class="btn-row">
-          <button type="button" class="btn btn-back" onclick="prevStep(4)">← Back</button>
-          <button type="button" class="btn btn-next" onclick="nextStep(4)">Next Step →</button>
-        </div>
-      </div>
-
-      <!-- Step 5: Growth & Strategy (per platform) -->
-      <div class="form-step" id="step5">
-        <h2>Let's talk <span class="accent">growth</span></h2>
-        <div id="platformQuestions5"></div>
-        <div class="btn-row">
-          <button type="button" class="btn btn-back" onclick="prevStep(5)">← Back</button>
-          <button type="submit" class="btn btn-submit">Get My Free Audit →</button>
+          <button type="button" class="btn btn-back" onclick="prevStep(2)">Back</button>
+          <button type="button" class="btn btn-submit" id="submitBtn" onclick="submitAudit()">Analyse My Profiles</button>
         </div>
       </div>
     </form>
@@ -160,233 +133,17 @@
 
   <script>
     let currentStep = 1;
-    const totalSteps = 5;
-
-    function getSelectedPlatforms() {
-      return Array.from(document.querySelectorAll('input[name="platforms"]:checked')).map(cb => cb.value);
-    }
-
-    function capitalize(str) {
-      if (str === 'twitter') return 'X / Twitter';
-      if (str === 'tiktok') return 'TikTok';
-      if (str === 'youtube') return 'YouTube';
-      if (str === 'linkedin') return 'LinkedIn';
-      if (str === 'pinterest') return 'Pinterest';
-      return str.charAt(0).toUpperCase() + str.slice(1);
-    }
-
-    function generatePlatformQuestions3(platforms) {
-      const container = document.getElementById('platformQuestions3');
-      container.innerHTML = '';
-      platforms.forEach(platform => {
-        const pName = capitalize(platform);
-        container.innerHTML += `
-          <div class="platform-section">
-            <h3 class="platform-section-title">${pName}</h3>
-            <div class="form-group">
-              <label>How clear is your bio/about section?</label>
-              <select name="bio_clarity_${platform}" required>
-                <option value="3">Clear — says what I do and who I help</option>
-                <option value="2">Exists but vague or generic</option>
-                <option value="1">Empty or irrelevant</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Do you have a working link in your profile?</label>
-              <div class="radio-row">
-                <label class="radio-label"><input type="radio" name="has_link_${platform}" value="yes" required> Yes</label>
-                <label class="radio-label"><input type="radio" name="has_link_${platform}" value="no"> No</label>
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Profile photo quality?</label>
-              <select name="photo_quality_${platform}" required>
-                <option value="3">Professional headshot or quality logo</option>
-                <option value="2">Exists but low quality or inconsistent</option>
-                <option value="1">Default avatar or missing</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Do you have pinned posts or highlights?</label>
-              <div class="radio-row">
-                <label class="radio-label"><input type="radio" name="pinned_content_${platform}" value="yes" required> Yes</label>
-                <label class="radio-label"><input type="radio" name="pinned_content_${platform}" value="no"> No</label>
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Visual consistency across your posts?</label>
-              <select name="visual_consistency_${platform}" required>
-                <option value="3">Consistent brand look — recognizable at a glance</option>
-                <option value="2">Somewhat consistent but no clear brand style</option>
-                <option value="1">Random visuals, no cohesion</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Caption / copy quality?</label>
-              <select name="caption_quality_${platform}" required>
-                <option value="3">Strong hooks, clear message, calls to action</option>
-                <option value="2">Captions exist but flat or unfocused</option>
-                <option value="1">No captions, single emojis, or copy-paste</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Content mix — value vs. promotional?</label>
-              <select name="content_mix_${platform}" required>
-                <option value="3">Mostly value-driven (educate/entertain), some promo</option>
-                <option value="2">Some value but too much selling or filler</option>
-                <option value="1">All promotional or completely random</option>
-              </select>
-            </div>
-          </div>
-        `;
-      });
-    }
-
-    function generatePlatformQuestions4(platforms) {
-      const container = document.getElementById('platformQuestions4');
-      container.innerHTML = '';
-      platforms.forEach(platform => {
-        const pName = capitalize(platform);
-        container.innerHTML += `
-          <div class="platform-section">
-            <h3 class="platform-section-title">${pName}</h3>
-            <div class="form-group">
-              <label>How many times per week do you post?</label>
-              <select name="frequency_${platform}" required>
-                <option value="7">Daily (7+/week)</option>
-                <option value="5">Most days (5-6/week)</option>
-                <option value="3">A few times (3-4/week)</option>
-                <option value="1">Once a week or less</option>
-                <option value="0">Rarely / almost never</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Do you have gaps of 2+ weeks with no posts?</label>
-              <div class="radio-row">
-                <label class="radio-label"><input type="radio" name="has_gaps_${platform}" value="yes" required> Yes, it happens</label>
-                <label class="radio-label"><input type="radio" name="has_gaps_${platform}" value="no"> No, I stay consistent</label>
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Do you use a scheduling tool?</label>
-              <div class="radio-row">
-                <label class="radio-label"><input type="radio" name="uses_scheduler_${platform}" value="yes" required> Yes</label>
-                <label class="radio-label"><input type="radio" name="uses_scheduler_${platform}" value="no"> No, I post manually</label>
-              </div>
-            </div>
-            <div class="form-group">
-              <label>How quickly do you reply to comments?</label>
-              <select name="replies_speed_${platform}" required>
-                <option value="3">Within a few hours</option>
-                <option value="2">Within a day or two</option>
-                <option value="1">Rarely or never reply</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Do you engage with other accounts in your niche?</label>
-              <select name="outbound_engagement_${platform}" required>
-                <option value="3">Yes, regularly — I comment on others' posts</option>
-                <option value="2">Occasionally</option>
-                <option value="1">No — I just post my own content</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Do your posts include clear calls to action?</label>
-              <div class="radio-row">
-                <label class="radio-label"><input type="radio" name="uses_ctas_${platform}" value="yes" required> Yes</label>
-                <label class="radio-label"><input type="radio" name="uses_ctas_${platform}" value="no"> Not really</label>
-              </div>
-            </div>
-          </div>
-        `;
-      });
-    }
-
-    function generatePlatformQuestions5(platforms) {
-      const container = document.getElementById('platformQuestions5');
-      container.innerHTML = '';
-      platforms.forEach(platform => {
-        const pName = capitalize(platform);
-        container.innerHTML += `
-          <div class="platform-section">
-            <h3 class="platform-section-title">${pName}</h3>
-            <div class="form-group">
-              <label>How are your followers trending?</label>
-              <select name="follower_trend_${platform}" required>
-                <option value="3">Growing steadily</option>
-                <option value="2">Flat — not much change</option>
-                <option value="1">Declining or stagnant for months</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Do you know which content types perform best?</label>
-              <div class="radio-row">
-                <label class="radio-label"><input type="radio" name="knows_top_content_${platform}" value="yes" required> Yes, I replicate what works</label>
-                <label class="radio-label"><input type="radio" name="knows_top_content_${platform}" value="no"> No idea</label>
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Do you use a hashtag or keyword strategy?</label>
-              <div class="radio-row">
-                <label class="radio-label"><input type="radio" name="uses_hashtags_${platform}" value="yes" required> Yes</label>
-                <label class="radio-label"><input type="radio" name="uses_hashtags_${platform}" value="no"> No</label>
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Do you cross-promote between platforms?</label>
-              <div class="radio-row">
-                <label class="radio-label"><input type="radio" name="cross_promotes_${platform}" value="yes" required> Yes</label>
-                <label class="radio-label"><input type="radio" name="cross_promotes_${platform}" value="no"> No, each platform is separate</label>
-              </div>
-            </div>
-          </div>
-        `;
-      });
-    }
 
     function nextStep(current) {
-      // Validation
       const stepEl = document.getElementById(`step${current}`);
       const inputs = stepEl.querySelectorAll('input[required], select[required], textarea[required]');
-      let valid = true;
-
-      if (current === 2) {
-        const platforms = getSelectedPlatforms();
-        if (platforms.length === 0) {
-          alert('Please select at least one platform.');
+      for (let input of inputs) {
+        if (!input.value.trim()) {
+          input.focus();
+          input.classList.add('error');
           return;
         }
-        // Generate dynamic questions for selected platforms
-        generatePlatformQuestions3(platforms);
-        generatePlatformQuestions4(platforms);
-        generatePlatformQuestions5(platforms);
       }
-
-      // Check required fields for non-dynamic steps
-      if (current !== 2) {
-        for (let input of inputs) {
-          if (!input.value) {
-            input.focus();
-            input.classList.add('error');
-            valid = false;
-            break;
-          }
-        }
-        if (!valid) return;
-      }
-
-      // Check radio groups in current step
-      if (current >= 3) {
-        const radioGroups = new Set();
-        stepEl.querySelectorAll('input[type="radio"][required]').forEach(r => radioGroups.add(r.name));
-        for (let groupName of radioGroups) {
-          if (!document.querySelector(`input[name="${groupName}"]:checked`)) {
-            alert('Please answer all questions before continuing.');
-            return;
-          }
-        }
-      }
-
       document.getElementById(`step${current}`).classList.remove('active');
       document.getElementById(`step${current + 1}`).classList.add('active');
       currentStep = current + 1;
@@ -399,21 +156,58 @@
       document.getElementById(`step${current - 1}`).classList.add('active');
       currentStep = current - 1;
       updateProgress();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function updateProgress() {
-      const pct = ((currentStep - 1) / (totalSteps - 1)) * 100;
+      const pct = ((currentStep - 1) / 1) * 100;
       document.getElementById('progressBar').style.width = pct + '%';
       document.querySelectorAll('.step-dot').forEach(dot => {
-        const step = parseInt(dot.dataset.step);
-        dot.classList.toggle('active', step <= currentStep);
+        dot.classList.toggle('active', parseInt(dot.dataset.step) <= currentStep);
       });
     }
 
-    // Remove error class on input
+    async function submitAudit() {
+      const form = document.getElementById('auditForm');
+      const formData = new FormData(form);
+      const data = {};
+      formData.forEach((val, key) => { data[key] = val; });
+
+      // Check at least one handle
+      const handles = Object.keys(data).filter(k => k.startsWith('handle_') && data[k].trim());
+      if (handles.length === 0) {
+        const errEl = document.getElementById('formError');
+        errEl.textContent = 'Please enter at least one social media handle.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Starting analysis...';
+
+      try {
+        const resp = await fetch('/api/audit/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const result = await resp.json();
+        if (result.error) {
+          throw new Error(result.error);
+        }
+        window.location.href = `/audit/loading?id=${result.auditId}`;
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = 'Analyse My Profiles';
+        const errEl = document.getElementById('formError');
+        errEl.textContent = err.message || 'Something went wrong. Please try again.';
+        errEl.style.display = 'block';
+      }
+    }
+
     document.addEventListener('input', (e) => {
       e.target.classList.remove('error');
+      document.getElementById('formError').style.display = 'none';
     });
   </script>
 </body>

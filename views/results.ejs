@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Your Social Media Audit Results | Always On Time</title>
+  <title>Your Social Media Audit Results | AW Media</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rethink+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -41,6 +41,55 @@
       </p>
     </header>
 
+    <!-- Real Metrics -->
+    <section class="section">
+      <h2>Your <span class="accent">Real Numbers</span></h2>
+      <div class="metrics-grid">
+        <% Object.entries(metrics).forEach(([platform, m]) => { %>
+          <% const pName = platform === 'twitter' ? 'X / Twitter' : platform === 'tiktok' ? 'TikTok' : platform === 'youtube' ? 'YouTube' : platform === 'linkedin' ? 'LinkedIn' : platform === 'pinterest' ? 'Pinterest' : platform.charAt(0).toUpperCase() + platform.slice(1); %>
+          <div class="metric-card <%= m.failed ? 'metric-failed' : '' %>">
+            <h3 class="metric-platform"><%= pName %></h3>
+            <% if (m.failed) { %>
+              <p class="metric-error">We couldn't access this profile. Check the handle and try again.</p>
+            <% } else { %>
+              <div class="metric-stats">
+                <div class="metric-stat-block">
+                  <span class="metric-value"><%= m.followers >= 1000000 ? (m.followers/1000000).toFixed(1)+'M' : m.followers >= 1000 ? (m.followers/1000).toFixed(1)+'K' : m.followers %></span>
+                  <span class="metric-label">Followers</span>
+                </div>
+                <div class="metric-stat-block">
+                  <span class="metric-value"><%= m.engagementRate %>%</span>
+                  <span class="metric-label">Eng. Rate</span>
+                </div>
+                <div class="metric-stat-block">
+                  <span class="metric-value"><%= m.postsPerWeek %></span>
+                  <span class="metric-label">Posts/Week</span>
+                </div>
+                <div class="metric-stat-block">
+                  <span class="metric-value"><%= m.daysSinceLastPost != null ? m.daysSinceLastPost + 'd' : 'N/A' %></span>
+                  <span class="metric-label">Last Post</span>
+                </div>
+              </div>
+              <div class="metric-extras">
+                <% if (m.avgLikes > 0) { %>
+                  <span class="metric-tag">Avg <%= m.avgLikes >= 1000 ? (m.avgLikes/1000).toFixed(1)+'K' : m.avgLikes %> likes</span>
+                <% } %>
+                <% if (m.avgComments > 0) { %>
+                  <span class="metric-tag">Avg <%= m.avgComments %> comments</span>
+                <% } %>
+                <% if (m.hashtagUsageRate > 0) { %>
+                  <span class="metric-tag"><%= m.hashtagUsageRate %>% posts use hashtags</span>
+                <% } %>
+                <% if (m.avgCaptionLength > 0) { %>
+                  <span class="metric-tag">Avg <%= m.avgCaptionLength %> char captions</span>
+                <% } %>
+              </div>
+            <% } %>
+          </div>
+        <% }); %>
+      </div>
+    </section>
+
     <!-- Platform Scorecard -->
     <section class="section">
       <h2>Platform <span class="accent">Scorecard</span></h2>
@@ -50,41 +99,20 @@
             <tr>
               <th>Dimension</th>
               <% Object.keys(results.platforms).forEach(platform => { %>
-                <th><%= platform.charAt(0).toUpperCase() + platform.slice(1) %></th>
+                <th><%= platform === 'twitter' ? 'X' : platform === 'tiktok' ? 'TikTok' : platform === 'youtube' ? 'YouTube' : platform === 'linkedin' ? 'LinkedIn' : platform.charAt(0).toUpperCase() + platform.slice(1) %></th>
               <% }); %>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Profile Optimization</td>
-              <% Object.values(results.platforms).forEach(s => { %>
-                <td><span class="rating-pill rating-<%= s.profileOptimization.rating.toLowerCase().replace(' ', '-') %>"><%= s.profileOptimization.rating %></span></td>
-              <% }); %>
-            </tr>
-            <tr>
-              <td>Content Quality</td>
-              <% Object.values(results.platforms).forEach(s => { %>
-                <td><span class="rating-pill rating-<%= s.contentQuality.rating.toLowerCase().replace(' ', '-') %>"><%= s.contentQuality.rating %></span></td>
-              <% }); %>
-            </tr>
-            <tr>
-              <td>Posting Consistency</td>
-              <% Object.values(results.platforms).forEach(s => { %>
-                <td><span class="rating-pill rating-<%= s.postingConsistency.rating.toLowerCase().replace(' ', '-') %>"><%= s.postingConsistency.rating %></span></td>
-              <% }); %>
-            </tr>
-            <tr>
-              <td>Engagement Health</td>
-              <% Object.values(results.platforms).forEach(s => { %>
-                <td><span class="rating-pill rating-<%= s.engagementHealth.rating.toLowerCase().replace(' ', '-') %>"><%= s.engagementHealth.rating %></span></td>
-              <% }); %>
-            </tr>
-            <tr>
-              <td>Growth Signals</td>
-              <% Object.values(results.platforms).forEach(s => { %>
-                <td><span class="rating-pill rating-<%= s.growthSignals.rating.toLowerCase().replace(' ', '-') %>"><%= s.growthSignals.rating %></span></td>
-              <% }); %>
-            </tr>
+            <% ['profileOptimization', 'contentQuality', 'postingConsistency', 'engagementHealth', 'growthSignals'].forEach(dim => { %>
+              <% const dimLabels = { profileOptimization: 'Profile Optimization', contentQuality: 'Content Quality', postingConsistency: 'Posting Consistency', engagementHealth: 'Engagement Health', growthSignals: 'Growth Signals' }; %>
+              <tr>
+                <td><%= dimLabels[dim] %></td>
+                <% Object.values(results.platforms).forEach(s => { %>
+                  <td><span class="rating-pill rating-<%= s[dim].rating.toLowerCase().replace(/[\s\/]/g, '-') %>"><%= s[dim].rating %></span></td>
+                <% }); %>
+              </tr>
+            <% }); %>
           </tbody>
         </table>
       </div>
@@ -97,7 +125,7 @@
       <div class="insight-cards">
         <% results.insights.wins.forEach((win, i) => { %>
           <div class="insight-card win-card">
-            <div class="insight-icon">✓</div>
+            <div class="insight-icon">&#10003;</div>
             <div class="insight-content">
               <span class="insight-platform"><%= win.platform %></span>
               <p><%= win.text %></p>
@@ -108,7 +136,7 @@
     </section>
     <% } %>
 
-    <!-- Quick Wins (Teaser) -->
+    <!-- Quick Wins -->
     <section class="section">
       <h2>Quick Wins <span class="accent">You Can Fix Today</span></h2>
       <div class="quick-wins">
@@ -205,7 +233,6 @@
           </div>
         </div>
 
-        <!-- Pricing Cards -->
         <div class="pricing-cards">
           <div class="pricing-card">
             <h4>Monthly</h4>
@@ -233,7 +260,7 @@
         </div>
 
         <div class="cta-buttons">
-          <a href="https://awmedia.typeform.com/aw-lwaysontime" class="btn btn-cta" target="_blank">See Our Work →</a>
+          <a href="https://awmedia.typeform.com/aw-lwaysontime" class="btn btn-cta" target="_blank">Get Started</a>
           <a href="mailto:alex@awmedia.marketing" class="btn btn-cta-secondary">Get In Touch</a>
         </div>
         <p class="cta-reassurance">3 month minimum term. Custom packages available. Pay-in-full discounts up to £300 off.</p>
@@ -273,14 +300,13 @@
             You've got a decent foundation — now it's about consistency and polish. Professional graphics on demand is the difference between "decent" and "can't stop scrolling."
           <% } %>
         </p>
-        <a href="https://awmedia.typeform.com/aw-lwaysontime" class="btn btn-cta" target="_blank">Fix My Social Media →</a>
+        <a href="https://awmedia.typeform.com/aw-lwaysontime" class="btn btn-cta" target="_blank">Fix My Social Media</a>
       </div>
     </section>
 
   </div>
 
   <script>
-    // Animate score ring on load
     window.addEventListener('load', () => {
       const ring = document.querySelector('.score-ring-fill');
       if (ring) {
@@ -291,8 +317,6 @@
           ring.style.strokeDashoffset = target;
         }, 300);
       }
-
-      // Animate score number
       const scoreEl = document.querySelector('.score-number');
       if (scoreEl) {
         const target = parseInt(scoreEl.textContent);

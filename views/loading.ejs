@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scanning Your Profiles... | AW Media</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rethink+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="container loading-page">
+    <div class="loading-hero">
+      <div class="pulse-ring"></div>
+      <h1>Scanning Your <span class="accent">Profiles</span></h1>
+      <p class="subtitle">We're pulling real data from your social accounts. This usually takes 30-90 seconds.</p>
+    </div>
+
+    <div class="platform-status-list">
+      <% platforms.forEach(platform => { %>
+        <div class="platform-status-item" id="status-<%= platform %>">
+          <div class="status-indicator">
+            <div class="status-spinner"></div>
+            <div class="status-check" style="display:none;">&#10003;</div>
+            <div class="status-fail" style="display:none;">&#10007;</div>
+          </div>
+          <div class="status-text">
+            <span class="status-platform-name"><%= platform === 'twitter' ? 'X / Twitter' : platform === 'tiktok' ? 'TikTok' : platform === 'youtube' ? 'YouTube' : platform === 'linkedin' ? 'LinkedIn' : platform === 'pinterest' ? 'Pinterest' : platform.charAt(0).toUpperCase() + platform.slice(1) %></span>
+            <span class="status-label">Waiting...</span>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+
+    <p class="loading-tip" id="loadingTip">Tip: Profiles with consistent posting and complete bios score highest.</p>
+  </div>
+
+  <script>
+    const auditId = '<%= auditId %>';
+    const tips = [
+      'Tip: Profiles with consistent posting and complete bios score highest.',
+      'Tip: Engagement rate matters more than follower count.',
+      'Tip: Posts with hashtags get 12% more reach on average.',
+      'Tip: The best time to post? When your audience is online — check your insights.',
+      'Tip: Carousels get 3x more engagement than single image posts on Instagram.',
+      'Tip: Video content is king on every platform right now.',
+    ];
+    let tipIndex = 0;
+    setInterval(() => {
+      tipIndex = (tipIndex + 1) % tips.length;
+      document.getElementById('loadingTip').textContent = tips[tipIndex];
+    }, 5000);
+
+    function updatePlatformStatus(platform, status) {
+      const el = document.getElementById(`status-${platform}`);
+      if (!el) return;
+      const spinner = el.querySelector('.status-spinner');
+      const check = el.querySelector('.status-check');
+      const fail = el.querySelector('.status-fail');
+      const label = el.querySelector('.status-label');
+
+      if (status === 'scanning') {
+        spinner.style.display = 'block';
+        check.style.display = 'none';
+        fail.style.display = 'none';
+        label.textContent = 'Scanning...';
+        el.classList.add('scanning');
+      } else if (status === 'complete') {
+        spinner.style.display = 'none';
+        check.style.display = 'flex';
+        fail.style.display = 'none';
+        label.textContent = 'Complete';
+        el.classList.remove('scanning');
+        el.classList.add('complete');
+      } else if (status === 'failed') {
+        spinner.style.display = 'none';
+        check.style.display = 'none';
+        fail.style.display = 'flex';
+        label.textContent = 'Could not access';
+        el.classList.remove('scanning');
+        el.classList.add('failed');
+      }
+    }
+
+    // SSE for real-time updates
+    const evtSource = new EventSource(`/api/audit/progress/${auditId}`);
+
+    evtSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === 'complete') {
+        evtSource.close();
+        setTimeout(() => {
+          window.location.href = `/audit/results/${auditId}`;
+        }, 800);
+        return;
+      }
+      if (data.platform) {
+        updatePlatformStatus(data.platform, data.status);
+      }
+    };
+
+    evtSource.onerror = () => {
+      evtSource.close();
+      // Fallback: poll every 3 seconds
+      const poll = setInterval(async () => {
+        try {
+          const resp = await fetch(`/api/audit/status/${auditId}`);
+          const data = await resp.json();
+          Object.entries(data.platformStatuses).forEach(([p, s]) => updatePlatformStatus(p, s));
+          if (data.status === 'complete') {
+            clearInterval(poll);
+            window.location.href = `/audit/results/${auditId}`;
+          }
+        } catch (e) {}
+      }, 3000);
+    };
+
+    // Safety timeout: redirect after 3 minutes regardless
+    setTimeout(() => {
+      window.location.href = `/audit/results/${auditId}`;
+    }, 180000);
+  </script>
+</body>
+</html>
