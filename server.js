@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 const { ApifyClient } = require('apify-client');
 const { v4: uuidv4 } = require('uuid');
 
@@ -18,29 +18,13 @@ if (apifyClient) {
   console.log('WARNING: APIFY_TOKEN not set — scraping disabled, will use fallback scoring');
 }
 
-// Email transporter
-let transporter = null;
-if (process.env.SMTP_HOST) {
-  transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT) || 587,
-    secure: parseInt(process.env.SMTP_PORT) === 465,
-    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-    tls: { rejectUnauthorized: false },
-    logger: true,
-    debug: process.env.SMTP_DEBUG === 'true',
-  });
-  console.log(`Email notifications enabled via SMTP (${process.env.SMTP_HOST}:${process.env.SMTP_PORT})`);
-  // Verify SMTP connection on startup
-  transporter.verify().then(() => {
-    console.log('SMTP connection verified — ready to send emails');
-  }).catch((err) => {
-    console.error('SMTP connection FAILED:', err.message);
-    console.error('Check your SMTP_HOST, SMTP_PORT, SMTP_USER, and SMTP_PASS env vars');
-  });
+// Email via Resend
+let resend = null;
+if (process.env.RESEND_API_KEY) {
+  resend = new Resend(process.env.RESEND_API_KEY);
+  console.log('Email notifications enabled via Resend');
 } else {
-  console.log('Email notifications disabled — set SMTP env vars to enable');
-  console.log('Required: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS');
+  console.log('Email notifications disabled — set RESEND_API_KEY env var to enable');
 }
 
 const NOTIFY_EMAIL = process.env.NOTIFY_EMAIL || 'alex@awmedia.marketing';
@@ -177,54 +161,32 @@ app.get('/api/test-email', async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  if (!transporter) {
+  if (!resend) {
     return res.json({
       success: false,
-      error: 'No SMTP transporter configured',
-      env: {
-        SMTP_HOST: process.env.SMTP_HOST ? 'set' : 'MISSING',
-        SMTP_PORT: process.env.SMTP_PORT ? 'set' : 'MISSING',
-        SMTP_USER: process.env.SMTP_USER ? 'set' : 'MISSING',
-        SMTP_PASS: process.env.SMTP_PASS ? 'set (hidden)' : 'MISSING',
-        SMTP_FROM: process.env.SMTP_FROM || 'not set (using default)',
-        NOTIFY_EMAIL: NOTIFY_EMAIL,
-      },
+      error: 'Resend not configured',
+      env: { RESEND_API_KEY: process.env.RESEND_API_KEY ? 'set (hidden)' : 'MISSING', NOTIFY_EMAIL: NOTIFY_EMAIL },
     });
   }
 
   try {
-    const info = await transporter.sendMail({
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
-      to: NOTIFY_EMAIL,
+    const { data, error } = await resend.emails.send({
+      from: 'Social Media Audit <onboarding@resend.dev>',
+      to: [NOTIFY_EMAIL],
       subject: 'Test Email — Social Media Audit Tool',
       html: `
         <div style="font-family:Arial,sans-serif;padding:20px;background:#0a0a0a;color:#fff;border-radius:12px;">
           <h2 style="color:#F92672;">Email is working!</h2>
           <p>This is a test email from your Social Media Audit Tool.</p>
           <p style="color:#888;">Sent at: ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}</p>
-          <p style="color:#888;">SMTP Host: ${process.env.SMTP_HOST}</p>
+          <p style="color:#888;">Provider: Resend</p>
         </div>
       `,
     });
-    res.json({
-      success: true,
-      message: `Test email sent to ${NOTIFY_EMAIL}`,
-      messageId: info.messageId,
-      response: info.response,
-    });
+    if (error) throw new Error(JSON.stringify(error));
+    res.json({ success: true, message: `Test email sent to ${NOTIFY_EMAIL}`, id: data.id });
   } catch (err) {
-    res.json({
-      success: false,
-      error: err.message,
-      code: err.code,
-      command: err.command,
-      env: {
-        SMTP_HOST: process.env.SMTP_HOST,
-        SMTP_PORT: process.env.SMTP_PORT,
-        SMTP_USER: process.env.SMTP_USER ? 'set (hidden)' : 'MISSING',
-        SMTP_PASS: process.env.SMTP_PASS ? 'set (hidden)' : 'MISSING',
-      },
-    });
+    res.json({ success: false, error: err.message });
   }
 });
 
@@ -872,7 +834,7 @@ function ratingColor(rating) {
 }
 
 async function sendLeadNotification(leadData, results, metrics) {
-  if (!transporter) return;
+  if (!resend) return;
 
   const goalLabels = {
     brand_awareness: 'Brand Awareness',
@@ -930,13 +892,14 @@ async function sendLeadNotification(leadData, results, metrics) {
     </div>`;
 
   try {
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM || 'noreply@awmedia.marketing',
-      to: NOTIFY_EMAIL,
+    const { data, error } = await resend.emails.send({
+      from: 'Social Media Audit <onboarding@resend.dev>',
+      to: [NOTIFY_EMAIL],
       subject: `New Audit Lead: ${leadData.name} (${results.overallScore}/100)`,
       html,
     });
-    console.log(`Email notification sent for ${leadData.name}`);
+    if (error) throw new Error(error.message);
+    console.log(`Email notification sent for ${leadData.name}`, data);
   } catch (err) {
     console.error('Failed to send email notification:', err.message);
   }
