@@ -171,7 +171,7 @@ app.get('/api/test-email', async (req, res) => {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: 'Social Media Audit <onboarding@resend.dev>',
+      from: 'Social Media Audit <noreply@awmedia.marketing>',
       to: [NOTIFY_EMAIL],
       subject: 'Test Email — Social Media Audit Tool',
       html: `
@@ -893,7 +893,7 @@ async function sendLeadNotification(leadData, results, metrics) {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: 'Social Media Audit <onboarding@resend.dev>',
+      from: 'Social Media Audit <noreply@awmedia.marketing>',
       to: [NOTIFY_EMAIL],
       subject: `New Audit Lead: ${leadData.name} (${results.overallScore}/100)`,
       html,
