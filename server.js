@@ -198,42 +198,38 @@ function generateInsights(scores, data) {
       wins.push({ platform: pName, text: `Your ${pName} engagement game is strong — you're responding, engaging outbound, and using CTAs effectively.` });
     }
 
-    // Gaps
-    if (s.profileOptimization.rating === 'Missing') {
-      gaps.push({ platform: pName, text: `Your ${pName} profile is missing key elements — visitors can't tell what you do or how to work with you.`, priority: 'high' });
-      quickWins.push({ platform: pName, text: `Rewrite your ${pName} bio with a clear value proposition and call-to-action.` });
+    // Quick wins — generate for both Missing AND Needs Work
+    if (s.profileOptimization.rating !== 'Strong') {
+      quickWins.push({ platform: pName, text: `Rewrite your ${pName} bio with a clear value proposition — say what you do, who you help, and include a call-to-action.` });
     }
-    if (s.postingConsistency.rating === 'Missing') {
-      gaps.push({ platform: pName, text: `Your ${pName} posting is inconsistent — the algorithm is suppressing your reach due to inactivity gaps.`, priority: 'high' });
-      quickWins.push({ platform: pName, text: `Set up a content scheduler and commit to a minimum posting frequency on ${pName}.` });
+    if (s.contentQuality.rating !== 'Strong') {
+      quickWins.push({ platform: pName, text: `Define 3 content pillars for ${pName} so every post reinforces your expertise and your audience knows what to expect.` });
     }
-    if (s.engagementHealth.rating === 'Missing') {
-      gaps.push({ platform: pName, text: `You're posting on ${pName} but not engaging — no replies, no outbound comments, no CTAs. You're broadcasting into a void.`, priority: 'medium' });
-      quickWins.push({ platform: pName, text: `Start a 10-minute daily engagement routine on ${pName} — comment on 5 accounts in your niche before posting.` });
+    if (s.postingConsistency.rating !== 'Strong') {
+      quickWins.push({ platform: pName, text: `Set up a content scheduler for ${pName} and commit to a minimum posting frequency — consistency beats volume.` });
     }
-    if (s.growthSignals.rating === 'Missing') {
-      gaps.push({ platform: pName, text: `No growth strategy on ${pName} — no hashtag research, no cross-promotion, and no awareness of what content performs best.`, priority: 'medium' });
-    }
-    if (s.contentQuality.rating === 'Missing') {
-      gaps.push({ platform: pName, text: `Content on ${pName} lacks direction — no visual consistency, weak captions, and no clear content pillars.`, priority: 'high' });
-    }
-
-    // Additional quick wins based on needs work
-    if (s.profileOptimization.rating === 'Needs Work') {
-      quickWins.push({ platform: pName, text: `Update your ${pName} profile photo and add a link-in-bio tool with your top 3 links.` });
+    if (s.engagementHealth.rating !== 'Strong') {
+      quickWins.push({ platform: pName, text: `Start a 10-minute daily engagement routine on ${pName} — comment on 5 accounts in your niche before you post.` });
     }
     if (s.growthSignals.rating !== 'Strong') {
-      quickWins.push({ platform: pName, text: `Pin your best-performing post to the top of your ${pName} profile.` });
+      quickWins.push({ platform: pName, text: `Pin your best-performing post to the top of your ${pName} profile so new visitors see your strongest content first.` });
+    }
+    if (s.profileOptimization.rating !== 'Strong') {
+      quickWins.push({ platform: pName, text: `Update your ${pName} profile photo and add a link-in-bio tool with your top 3 links.` });
+    }
+    if (s.engagementHealth.rating !== 'Strong') {
+      quickWins.push({ platform: pName, text: `Add a specific call-to-action to every ${pName} post — ask a question, direct to a link, or invite a DM.` });
+    }
+    if (s.growthSignals.rating !== 'Strong') {
+      quickWins.push({ platform: pName, text: `Research 5-10 niche-specific hashtags for ${pName} and use them consistently — ditch the generic ones.` });
     }
   });
 
-  // Limit to top 3 each
+  // Limit results
   return {
     wins: wins.slice(0, 3),
-    gaps: gaps.sort((a, b) => (a.priority === 'high' ? -1 : 1)).slice(0, 3),
-    quickWins: quickWins.slice(0, 2), // Only show 2 in teaser
+    quickWins: quickWins.slice(0, 2), // Show 2 in teaser
     totalQuickWins: quickWins.length,
-    totalGaps: gaps.length,
   };
 }
 

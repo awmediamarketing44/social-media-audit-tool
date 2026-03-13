@@ -108,27 +108,6 @@
     </section>
     <% } %>
 
-    <!-- Biggest Gaps -->
-    <section class="section">
-      <h2>Biggest <span class="accent">Gaps</span></h2>
-      <div class="insight-cards">
-        <% results.insights.gaps.forEach((gap, i) => { %>
-          <div class="insight-card gap-card">
-            <div class="insight-icon">!</div>
-            <div class="insight-content">
-              <span class="insight-platform"><%= gap.platform %></span>
-              <p><%= gap.text %></p>
-            </div>
-          </div>
-        <% }); %>
-      </div>
-      <% if (results.insights.totalGaps > 3) { %>
-        <div class="locked-teaser">
-          <p>+ <%= results.insights.totalGaps - 3 %> more gaps identified in your full audit</p>
-        </div>
-      <% } %>
-    </section>
-
     <!-- Quick Wins (Teaser) -->
     <section class="section">
       <h2>Quick Wins <span class="accent">You Can Fix Today</span></h2>
